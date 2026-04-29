@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - CRAMBRUNCH</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#020617,#0f172a);
+color:#fff;
+}
+
+/* signup button */
+#signupBtn{
+position:absolute;
+top:20px;
+right:20px;
+padding:10px 18px;
+background:#2563eb;
+border:none;
+border-radius:6px;
+color:#fff;
+cursor:pointer;
+transition:.3s;
+}
+
+#signupBtn:hover{
+transform:scale(1.05);
+box-shadow:0 0 10px #2563eb;
+}
+
+/* login card */
+.box{
+width:360px;
+padding:30px;
+border-radius:14px;
+background:rgba(30,41,59,.6);
+backdrop-filter:blur(10px);
+box-shadow:0 0 25px rgba(37,99,235,.3);
+animation:fade .8s ease;
+}
+
+.box h2{
+text-align:center;
+margin-bottom:18px;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin:8px 0;
+border:none;
+border-radius:6px;
+outline:none;
+}
+
+/* login button */
+.main-btn{
+width:100%;
+padding:10px;
+margin-top:10px;
+background:#22c55e;
+border:none;
+border-radius:6px;
+color:#fff;
+font-weight:bold;
+cursor:pointer;
+transition:.3s;
+}
+
+.main-btn:hover{
+background:#16a34a;
+transform:scale(1.03);
+box-shadow:0 0 12px #22c55e;
+}
+
+#error{
+margin-top:10px;
+text-align:center;
+color:#ef4444;
+}
+
+.extra{
+text-align:center;
+margin-top:12px;
+font-size:14px;
+}
+
+.extra a{
+color:#60a5fa;
+text-decoration:none;
+}
+
+.extra a:hover{
+text-decoration:underline;
+}
+
+@keyframes fade{
+from{opacity:0;transform:translateY(20px);}
+to{opacity:1;transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<button id="signupBtn" onclick="window.location='signup.html'">Signup</button>
+
+<div class="box">
+
+<h2>🔐 Login</h2>
+
+<select id="role">
+<option value="">Select Role</option>
+<option value="student">Student</option>
+<option value="teacher">Teacher</option>
+<option value="admin">Admin</option>
+</select>
+
+<input id="id" placeholder="User ID">
+<input id="roll" placeholder="Roll Number">
+<input id="email" placeholder="Email">
+<input id="phone" placeholder="Phone Number">
+<input id="pass" type="password" placeholder="Password">
+
+<button class="main-btn" onclick="login()">Login</button>
+
+<div id="error"></div>
+
+<div class="extra">
+New user? <a href="signup.html">Create Account</a>
+</div>
+
+<div class="extra">
+Forgot Password? <a href="forgot.html">Reset Here</a>
+</div>
+
+</div>
+
+<script>
+function login(){
+
+let role     = document.getElementById("role").value;
+let userId   = document.getElementById("id").value;
+let rollNo   = document.getElementById("roll").value;
+let email    = document.getElementById("email").value;
+let phone    = document.getElementById("phone").value;
+let password = document.getElementById("pass").value;
+
+if(role==="" || userId==="" || rollNo==="" || email==="" || phone==="" || password===""){
+document.getElementById("error").innerText="Please fill all fields";
+return;
+}
+
+fetch("/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+role:role,
+userId:userId,
+rollNo:rollNo,
+email:email,
+phone:phone,
+password:password
+})
+})
+.then(res=>res.json())
+.then(data=>{
+
+if(data.success){
+
+localStorage.setItem("userId",userId);
+localStorage.setItem("role",role);
+
+if(data.role==="student"){
+window.location="student.html";
+}
+else if(data.role==="teacher"){
+window.location="teacher.html";
+}
+else if(data.role==="admin"){
+window.location="admin.html";
+}
+else{
+document.getElementById("error").innerText="Invalid Role";
+}
+
+}else{
+document.getElementById("error").innerText="Invalid Login Details";
+}
+
+})
+.catch(()=>{
+document.getElementById("error").innerText="Server Error";
+});
+
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,992 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Super Admin – CRAMBRUNCH</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ── Modal System ── */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;padding:1rem}
+.modal-backdrop.open{display:flex}
+.modal-box{background:#141928;border:1px solid #1e2840;border-radius:18px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:mup .25s ease}
+@keyframes mup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:1.4rem 1.6rem;border-bottom:1px solid #1e2840}
+.modal-head h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700}
+.modal-body{padding:1.6rem}
+.modal-foot{padding:1rem 1.6rem;border-top:1px solid #1e2840;display:flex;gap:.75rem;justify-content:flex-end}
+.close-btn{background:none;border:1px solid #1e2840;color:#6b7799;width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:.2s}
+.close-btn:hover{color:#e8ecf8;border-color:#e8ecf8}
+/* ── Stat Cards ── */
+.sa-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
+.sa-card{background:#141928;border:1px solid #1e2840;border-radius:14px;padding:1.2rem;position:relative;overflow:hidden}
+.sa-card::after{content:'';position:absolute;top:-30px;right:-30px;width:80px;height:80px;border-radius:50%;opacity:.07}
+.sa-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;line-height:1}
+.sa-lbl{font-size:.75rem;color:#6b7799;margin-top:.3rem}
+.sa-ico{position:absolute;top:1rem;right:1rem;font-size:1.4rem;opacity:.6}
+/* ── Section Cards ── */
+.sec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.5rem}
+.sec-btn{background:#141928;border:1px solid #1e2840;border-radius:14px;padding:1.3rem;cursor:pointer;text-align:left;transition:.25s;display:flex;flex-direction:column;gap:.5rem}
+.sec-btn:hover{border-color:#4f8ef7;transform:translateY(-2px);background:rgba(79,142,247,.05)}
+.sec-btn .s-ico{font-size:1.5rem}
+.sec-btn .s-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:#e8ecf8}
+.sec-btn .s-desc{font-size:.78rem;color:#6b7799;line-height:1.5}
+/* ── Toggle Switch ── */
+.tog{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0}
+.tog input{display:none}
+.tog-sl{position:absolute;inset:0;background:#1e2840;border-radius:100px;cursor:pointer;transition:.3s}
+.tog-sl::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#6b7799;border-radius:50%;transition:.3s}
+.tog input:checked+.tog-sl{background:#00d68f}
+.tog input:checked+.tog-sl::before{transform:translateX(18px);background:#fff}
+/* ── Table ── */
+.t-action-row{display:flex;gap:.4rem;flex-wrap:wrap}
+/* ── Audit ── */
+.audit-feed{max-height:340px;overflow-y:auto}
+.a-row{display:flex;gap:.75rem;padding:.7rem 0;border-bottom:1px solid rgba(30,40,64,.6);font-size:.82rem;align-items:flex-start}
+.a-row:last-child{border-bottom:none}
+.a-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:.3rem}
+.a-time{color:#6b7799;font-size:.75rem;width:130px;flex-shrink:0}
+.a-text{flex:1;line-height:1.5}
+.a-user{color:#4f8ef7;font-weight:600}
+/* ── Permission Grid ── */
+.perm-grid{overflow-x:auto}
+.perm-table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:580px}
+.perm-table th,.perm-table td{padding:.6rem .8rem;border:1px solid #1e2840;text-align:center}
+.perm-table th{background:#0f1420;color:#6b7799;font-size:.73rem;text-transform:uppercase;letter-spacing:.5px}
+.perm-table td:first-child{text-align:left;font-weight:600}
+/* ── SkillHub Monitor ── */
+.skill-monitor{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem}
+.sk-card{background:#0f1420;border:1px solid #1e2840;border-radius:12px;padding:1.1rem}
+.sk-card .sk-num{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:700}
+.sk-card .sk-lbl{font-size:.75rem;color:#6b7799;margin-top:.2rem}
+/* ── Dept Tree ── */
+.dept-tree{padding:.5rem 0}
+.dept-item{background:#0f1420;border:1px solid #1e2840;border-radius:10px;margin-bottom:.6rem;overflow:hidden}
+.dept-head{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;cursor:pointer}
+.dept-head h4{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700}
+.dept-body{padding:.8rem 1rem;border-top:1px solid #1e2840;display:none}
+.dept-body.open{display:block}
+.year-row{display:flex;align-items:center;gap:.5rem;padding:.35rem 0;font-size:.83rem}
+.year-label{width:80px;flex-shrink:0;color:#6b7799}
+.sem-chips{display:flex;gap:.4rem;flex-wrap:wrap}
+.sem-chip{background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.25);color:#4f8ef7;padding:.2rem .6rem;border-radius:6px;font-size:.72rem}
+/* ── Notif compose ── */
+.notif-targets{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem}
+.ntarget{border:1px solid #1e2840;border-radius:8px;padding:.35rem .75rem;font-size:.78rem;cursor:pointer;transition:.2s;background:none;color:#6b7799;font-family:'DM Sans',sans-serif}
+.ntarget.sel{background:rgba(79,142,247,.1);border-color:#4f8ef7;color:#4f8ef7}
+/* ── Progress ring ── */
+.mini-ring{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem}
+.ring-bar{flex:1;height:6px;background:#1e2840;border-radius:100px;overflow:hidden}
+.ring-fill{height:100%;border-radius:100px}
+/* ── Responsive ── */
+@media(max-width:600px){.sa-stats{grid-template-columns:1fr 1fr}.sec-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CRAMBRUNCH</div>
+  <div class="sidebar-role">Super Admin</div>
+
+  <div class="nav-section">Dashboard</div>
+  <button class="nav-item active" onclick="showPage('overview',this)"><span class="icon">🏠</span>Overview</button>
+
+  <div class="nav-section">Structure</div>
+  <button class="nav-item" onclick="showPage('academic',this)"><span class="icon">🏫</span>Academic Structure</button>
+  <button class="nav-item" onclick="showPage('rbac',this)"><span class="icon">🔑</span>Roles & Permissions</button>
+
+  <div class="nav-section">Users</div>
+  <button class="nav-item" onclick="showPage('users',this)"><span class="icon">👥</span>All Users</button>
+  <button class="nav-item" onclick="showPage('create-role',this)"><span class="icon">🧑‍💼</span>Create Admin/Role</button>
+
+  <div class="nav-section">Operations</div>
+  <button class="nav-item" onclick="showPage('config',this)"><span class="icon">⚙️</span>System Config</button>
+  <button class="nav-item" onclick="showPage('complaints',this)"><span class="icon">🔒</span>Complaints (All)</button>
+  <button class="nav-item" onclick="showPage('skillhub',this)"><span class="icon">💡</span>SkillHub Monitor</button>
+  <button class="nav-item" onclick="showPage('reports',this)"><span class="icon">📊</span>Reports & Analytics</button>
+
+  <div class="nav-section">Control</div>
+  <button class="nav-item" onclick="showPage('audit',this)"><span class="icon">📋</span>Audit Logs</button>
+  <button class="nav-item" onclick="showPage('security',this)"><span class="icon">🛡️</span>Security</button>
+  <button class="nav-item" onclick="showPage('broadcast',this)"><span class="icon">📢</span>Broadcast</button>
+  <button class="nav-item" onclick="showPage('branding',this)"><span class="icon">🎨</span>College Branding</button>
+  <button class="nav-item" onclick="showPage('database',this)"><span class="icon">🗄️</span>Database</button>
+
+  <div class="sidebar-bottom">
+    <a href="../index.html" style="display:flex;align-items:center;gap:.5rem;color:#6b7799;text-decoration:none;font-size:.8rem;margin-bottom:.8rem">← Back to Home</a>
+    <div class="user-info">
+      <div class="avatar" style="background:linear-gradient(135deg,#ff4d6d,#7c4dff)">SA</div>
+      <div><div class="user-name">Super Admin</div><div class="user-role">Full System Access</div></div>
+    </div>
+  </div>
+</div>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button class="sidebar-toggle" onclick="openSidebar()">☰</button>
+      <div class="topbar-title" id="pageTitle">System Overview</div>
+    </div>
+    <div class="topbar-right">
+      <span class="chip chip-red" style="font-size:.72rem;letter-spacing:.5px">SUPER ADMIN</span>
+      <button class="notif-btn" onclick="showPage('broadcast',null)">📢</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ OVERVIEW ══ -->
+    <div class="page active" id="page-overview">
+      <div class="sa-stats">
+        <div class="sa-card"><span class="sa-ico">🎒</span><div class="sa-val" style="color:#4f8ef7">186</div><div class="sa-lbl">Total Students</div></div>
+        <div class="sa-card"><span class="sa-ico">👩‍🏫</span><div class="sa-val" style="color:#00e5c0">36</div><div class="sa-lbl">Faculty Members</div></div>
+        <div class="sa-card"><span class="sa-ico">🏛️</span><div class="sa-val" style="color:#7c4dff">3</div><div class="sa-lbl">Departments</div></div>
+        <div class="sa-card"><span class="sa-ico">⚠️</span><div class="sa-val" style="color:#ff4d6d">2</div><div class="sa-lbl">Escalated Issues</div></div>
+        <div class="sa-card"><span class="sa-ico">📊</span><div class="sa-val" style="color:#ffb347">79%</div><div class="sa-lbl">Avg Attendance</div></div>
+        <div class="sa-card"><span class="sa-ico">✅</span><div class="sa-val" style="color:#00d68f">99.8%</div><div class="sa-lbl">System Uptime</div></div>
+      </div>
+
+      <div style="margin-bottom:.6rem;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:#6b7799;text-transform:uppercase;letter-spacing:1px">Quick Actions</div>
+      <div class="sec-grid">
+        <button class="sec-btn" onclick="showPage('create-role',null);showNav('create-role')"><div class="s-ico">🧑‍💼</div><div class="s-title">Create Admin / Role</div><div class="s-desc">Add new HOD, Office Staff, or custom role instantly</div></button>
+        <button class="sec-btn" onclick="showPage('academic',null);showNav('academic')"><div class="s-ico">🏫</div><div class="s-title">Academic Structure</div><div class="s-desc">Manage departments, years, semesters</div></button>
+        <button class="sec-btn" onclick="openModal('broadcastModal')"><div class="s-ico">📢</div><div class="s-title">Broadcast Message</div><div class="s-desc">Send global announcement to all users</div></button>
+        <button class="sec-btn" onclick="showPage('audit',null);showNav('audit')"><div class="s-ico">📋</div><div class="s-title">View Audit Log</div><div class="s-desc">Track every action made in the system</div></button>
+        <button class="sec-btn" onclick="showPage('complaints',null);showNav('complaints')"><div class="s-ico">🔒</div><div class="s-title">Escalated Complaints</div><div class="s-desc">2 complaints require your attention</div></button>
+        <button class="sec-btn" onclick="showPage('database',null);showNav('database')"><div class="s-ico">🗄️</div><div class="s-title">Database Control</div><div class="s-desc">Backup, restore, or access raw data</div></button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Live Audit Stream</div><button class="btn btn-ghost btn-sm" onclick="showPage('audit',null);showNav('audit')">View All →</button></div>
+        <div class="panel-body">
+          <div class="a-row"><div class="a-dot" style="background:#4f8ef7"></div><div class="a-time">Today 10:15 AM</div><div class="a-text"><span class="a-user">Prof. P. Sharma</span> marked attendance — Web Tech, MCA Sem 3</div></div>
+          <div class="a-row"><div class="a-dot" style="background:#00d68f"></div><div class="a-time">Today 9:42 AM</div><div class="a-text"><span class="a-user">HOD R. Mishra</span> approved leave for Student 236036</div></div>
+          <div class="a-row"><div class="a-dot" style="background:#ffb347"></div><div class="a-time">Today 9:02 AM</div><div class="a-text"><span class="a-user">Office Meena</span> entered DBMS Internal 2 marks — MCA Sem 3</div></div>
+          <div class="a-row"><div class="a-dot" style="background:#ff4d6d"></div><div class="a-time">Yesterday 4:15 PM</div><div class="a-text"><span class="a-user">Student 236070</span> new registration submitted — pending verification</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ACADEMIC STRUCTURE ══ -->
+    <div class="page" id="page-academic">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.7rem">
+        <div style="font-size:.85rem;color:#6b7799">Manage Department → Year → Semester hierarchy. Super Admin has full control to create, modify, or delete any structure.</div>
+        <button class="btn btn-blue" onclick="openModal('addDeptModal')">+ Add Department</button>
+      </div>
+
+      <div class="dept-tree">
+        <!-- MCA -->
+        <div class="dept-item">
+          <div class="dept-head" onclick="toggleDept(this)">
+            <div style="display:flex;align-items:center;gap:.75rem"><span style="font-size:1.2rem">🏫</span><div><h4>MCA – Master of Computer Applications</h4><div style="font-size:.75rem;color:#6b7799">62 Students · 8 Faculty · Sem 1–4</div></div></div>
+            <div style="display:flex;gap:.5rem"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openModal('editDeptModal')">Edit</button><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();confirmDelete('department MCA')">Delete</button><span id="arr1" style="color:#6b7799;margin-left:.3rem">▼</span></div>
+          </div>
+          <div class="dept-body open" id="db1">
+            <div class="year-row"><div class="year-label">1st Year</div><div class="sem-chips"><span class="sem-chip">Sem 1</span><span class="sem-chip">Sem 2</span></div><button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="openModal('addSemModal')">+ Sem</button></div>
+            <div class="year-row"><div class="year-label">2nd Year</div><div class="sem-chips"><span class="sem-chip">Sem 3</span><span class="sem-chip">Sem 4</span></div><button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="openModal('addSemModal')">+ Sem</button></div>
+            <button class="btn btn-ghost btn-sm" style="margin-top:.6rem" onclick="openModal('addYearModal')">+ Add Year</button>
+          </div>
+        </div>
+        <!-- BCA -->
+        <div class="dept-item">
+          <div class="dept-head" onclick="toggleDept(this)">
+            <div style="display:flex;align-items:center;gap:.75rem"><span style="font-size:1.2rem">🏫</span><div><h4>BCA – Bachelor of Computer Applications</h4><div style="font-size:.75rem;color:#6b7799">80 Students · 10 Faculty · Sem 1–6</div></div></div>
+            <div style="display:flex;gap:.5rem"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openModal('editDeptModal')">Edit</button><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();confirmDelete('department BCA')">Delete</button><span style="color:#6b7799;margin-left:.3rem">▶</span></div>
+          </div>
+          <div class="dept-body">
+            <div class="year-row"><div class="year-label">1st Year</div><div class="sem-chips"><span class="sem-chip">Sem 1</span><span class="sem-chip">Sem 2</span></div></div>
+            <div class="year-row"><div class="year-label">2nd Year</div><div class="sem-chips"><span class="sem-chip">Sem 3</span><span class="sem-chip">Sem 4</span></div></div>
+            <div class="year-row"><div class="year-label">3rd Year</div><div class="sem-chips"><span class="sem-chip">Sem 5</span><span class="sem-chip">Sem 6</span></div></div>
+          </div>
+        </div>
+        <!-- B.Tech -->
+        <div class="dept-item">
+          <div class="dept-head" onclick="toggleDept(this)">
+            <div style="display:flex;align-items:center;gap:.75rem"><span style="font-size:1.2rem">🏫</span><div><h4>B.Tech – Computer Science Engineering</h4><div style="font-size:.75rem;color:#6b7799">44 Students · 18 Faculty · Sem 1–8</div></div></div>
+            <div style="display:flex;gap:.5rem"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openModal('editDeptModal')">Edit</button><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();confirmDelete('department B.Tech CSE')">Delete</button><span style="color:#6b7799;margin-left:.3rem">▶</span></div>
+          </div>
+          <div class="dept-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ROLES & PERMISSIONS (RBAC) ══ -->
+    <div class="page" id="page-rbac">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.7rem">
+        <div style="font-size:.85rem;color:#6b7799">Define what each role can see and do. Changes apply system-wide immediately.</div>
+        <button class="btn btn-blue" onclick="openModal('addRoleModal')">+ Create Custom Role</button>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Permission Matrix</div><button class="btn btn-ghost btn-sm" onclick="openModal('editPermModal')">Edit Permissions</button></div>
+        <div class="panel-body perm-grid">
+          <table class="perm-table">
+            <thead>
+              <tr><th>Role</th><th>View Attendance</th><th>Mark Attendance</th><th>Enter Marks</th><th>View Marks</th><th>Complaints</th><th>Reports</th><th>User Mgmt</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>🔴 Super Admin</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅ Full</td><td>✅ All</td><td>✅ Full</td></tr>
+              <tr><td>🟠 HOD / Admin</td><td>✅ Dept</td><td>❌</td><td>❌</td><td>✅ Dept</td><td>✅ Manage</td><td>✅ Dept</td><td>✅ Dept</td></tr>
+              <tr><td>🟡 Teacher</td><td>✅ Own</td><td>✅ Own</td><td>✅ Own</td><td>✅ Own</td><td>❌</td><td>👁️ Own</td><td>❌</td></tr>
+              <tr><td>🔵 Office Staff</td><td>❌</td><td>❌</td><td>✅ Enter</td><td>✅ View</td><td>❌</td><td>❌</td><td>❌</td></tr>
+              <tr><td>🟢 Student</td><td>👁️ Own</td><td>❌</td><td>❌</td><td>👁️ Own</td><td>✅ Submit</td><td>❌</td><td>❌</td></tr>
+              <tr><td>🟣 Parent</td><td>👁️ Child</td><td>❌</td><td>❌</td><td>👁️ Child</td><td>❌</td><td>👁️ Child</td><td>❌</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Role List</div></div>
+        <div class="panel-body"><div class="table-wrap"><table>
+          <thead><tr><th>Role Name</th><th>Users</th><th>Created By</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><span class="chip chip-red">Super Admin</span></td><td>1</td><td>System</td><td><button class="btn btn-ghost btn-sm" disabled>Protected</button></td></tr>
+            <tr><td><span class="chip chip-yellow">HOD / Admin</span></td><td>6</td><td>Super Admin</td><td><div class="t-action-row"><button class="btn btn-ghost btn-sm" onclick="openModal('editRoleModal')">Edit</button></div></td></tr>
+            <tr><td><span class="chip chip-blue">Teacher</span></td><td>36</td><td>Super Admin</td><td><div class="t-action-row"><button class="btn btn-ghost btn-sm" onclick="openModal('editRoleModal')">Edit</button></div></td></tr>
+            <tr><td><span class="chip chip-purple">Office Staff</span></td><td>8</td><td>Super Admin</td><td><div class="t-action-row"><button class="btn btn-ghost btn-sm" onclick="openModal('editRoleModal')">Edit</button><button class="btn btn-danger btn-sm" onclick="confirmDelete('Office Staff role')">Delete</button></div></td></tr>
+          </tbody>
+        </table></div></div>
+      </div>
+    </div>
+
+    <!-- ══ ALL USERS ══ -->
+    <div class="page" id="page-users">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.7rem">
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+          <select class="btn btn-ghost" onchange="filterUsersByRole(this.value)" style="cursor:pointer">
+            <option value="">All Roles</option>
+            <option>Student</option><option>Teacher</option><option>HOD</option><option>Office</option><option>Parent</option>
+          </select>
+          <select class="btn btn-ghost" style="cursor:pointer">
+            <option value="">All Departments</option>
+            <option>MCA</option><option>BCA</option><option>B.Tech CSE</option>
+          </select>
+        </div>
+        <button class="btn btn-blue" onclick="openModal('addUserModal')">+ Add User</button>
+      </div>
+      <div class="panel">
+        <div class="panel-body"><div class="table-wrap"><table>
+          <thead><tr><th>Name</th><th>Role</th><th>Dept</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="userTableBody">
+            <tr><td>Pujarani Sahoo</td><td><span class="chip chip-green">Student</span></td><td>MCA</td><td>pujarani@college.edu</td><td><span class="chip chip-green">Active</span></td><td><div class="t-action-row"><button class="btn btn-ghost btn-sm" onclick="openModal('editUserModal')">Edit</button><button class="btn btn-danger btn-sm" onclick="confirmDelete('user Pujarani Sahoo')">Remove</button><button class="btn btn-ghost btn-sm" onclick="toggleSuspend(this)">Suspend</button></div></td></tr>
+            <tr><td>Prof. P. Sharma</td><td><span class="chip chip-blue">Teacher</span></td><td>MCA</td><td>sharma@college.edu</td><td><span class="chip chip-green">Active</span></td><td><div class="t-action-row"><button class="btn btn-ghost btn-sm" onclick="openModal('editUserModal')">Edit</button><button class="btn btn-danger btn-sm" onclick="confirmDelete('user Prof. Sharma')">Remove</button><button class="btn btn-ghost btn-sm" onclick="toggleSuspend(this)">Suspend</button></div></td></tr>
+            <tr><td>Dr. R. Mishra</td><td><span class="chip chip-yellow">HOD</span></td><td>MCA</td><td>mishra@college.edu</td><td><span class="chip chip-green">Active</span></td><td><div class="t-action-row"><button class="btn btn-ghost btn-sm" onclick="openModal('editUserModal')">Edit</button><button class="btn btn-danger btn-sm" onclick="confirmDelete('user Dr. Mishra')">Remove</button><button class="btn btn-ghost btn-sm" onclick="toggleSuspend(this)">Suspend</button></div></td></tr>
+            <tr><td>Meena Kumari</td><td><span class="chip chip-purple">Office</span></td><td>Admin</td><td>meena@college.edu</td><td><span class="chip chip-green">Active</span></td><td><div class="t-action-row"><button class="btn btn-ghost btn-sm" onclick="openModal('editUserModal')">Edit</button><button class="btn btn-danger btn-sm" onclick="confirmDelete('user Meena')">Remove</button><button class="btn btn-ghost btn-sm" onclick="toggleSuspend(this)">Suspend</button></div></td></tr>
+            <tr><td>Ankit Sharma</td><td><span class="chip chip-green">Student</span></td><td>MCA</td><td>ankit@college.edu</td><td><span class="chip chip-yellow">Pending</span></td><td><div class="t-action-row"><button class="btn btn-success btn-sm" onclick="verifyUser(this)">Verify</button><button class="btn btn-danger btn-sm" onclick="confirmDelete('user Ankit')">Reject</button></div></td></tr>
+          </tbody>
+        </table></div></div>
+      </div>
+    </div>
+
+    <!-- ══ CREATE ADMIN / ROLE ══ -->
+    <div class="page" id="page-create-role">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Create New Admin / User</div></div>
+          <div class="panel-body">
+            <div class="form-group"><label>Full Name</label><input type="text" id="cr-name" placeholder="e.g. Dr. Anita Roy"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="cr-email" placeholder="admin@college.edu"></div>
+            <div class="form-group"><label>Role</label>
+              <select id="cr-role" onchange="toggleDeptField(this.value)">
+                <option value="">Select Role</option>
+                <option value="hod">HOD / Admin</option>
+                <option value="teacher">Teacher / Faculty</option>
+                <option value="office">Office Assistant</option>
+                <option value="student">Student</option>
+                <option value="parent">Parent</option>
+                <option value="custom">Custom Role</option>
+              </select>
+            </div>
+            <div class="form-group" id="deptField"><label>Department</label>
+              <select>
+                <option>MCA</option><option>BCA</option><option>B.Tech CSE</option><option>Admin Office</option>
+              </select>
+            </div>
+            <div class="form-group" id="customRoleField" style="display:none"><label>Custom Role Name</label><input type="text" placeholder="e.g. Exam Controller"></div>
+            <div class="form-group"><label>Phone</label><input type="tel" placeholder="+91 98765 43210"></div>
+            <div class="form-group"><label>Temporary Password</label><input type="password" placeholder="Will be emailed to user" id="cr-pass"></div>
+            <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+              <button class="btn btn-blue" onclick="createUser()">Create & Send Credentials</button>
+              <button class="btn btn-ghost" onclick="document.getElementById('cr-name').value='';document.getElementById('cr-email').value=''">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Recently Created</div></div>
+          <div class="panel-body"><div class="table-wrap"><table>
+            <thead><tr><th>Name</th><th>Role</th><th>Created</th></tr></thead>
+            <tbody>
+              <tr><td>Dr. S. Panda</td><td><span class="chip chip-yellow">HOD</span></td><td>15 Mar</td></tr>
+              <tr><td>Prof. V. Kumar</td><td><span class="chip chip-blue">Teacher</span></td><td>12 Mar</td></tr>
+              <tr><td>Raj Office</td><td><span class="chip chip-purple">Office</span></td><td>10 Mar</td></tr>
+            </tbody>
+          </table></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SYSTEM CONFIG ══ -->
+    <div class="page" id="page-config">
+      <div class="grid-2">
+        <div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">⏱️ Complaint Escalation</div></div>
+            <div class="panel-body">
+              <div class="form-group"><label>Escalate to HOD after (hours)</label><input type="number" value="24" id="cfg-hod"></div>
+              <div class="form-group"><label>Escalate to VC after HOD (hours)</label><input type="number" value="48" id="cfg-vc"></div>
+              <div class="form-group"><label>Warn before escalation (hours)</label><input type="number" value="4" id="cfg-warn"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><span style="font-size:.85rem">Auto-email VC on final escalation</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+              <button class="btn btn-blue btn-sm" onclick="saveConfig('Complaint escalation settings')">Save</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">📊 Attendance Policy</div></div>
+            <div class="panel-body">
+              <div class="form-group"><label>Minimum attendance threshold (%)</label><input type="number" value="75"></div>
+              <div class="form-group"><label>Auto-alert parents below (%)</label><input type="number" value="75"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><span style="font-size:.85rem">Email parents on low attendance</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><span style="font-size:.85rem">Show 75% predictor to students</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+              <button class="btn btn-blue btn-sm" onclick="saveConfig('Attendance policy')">Save</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">📝 Marks & Evaluation</div></div>
+            <div class="panel-body">
+              <div class="form-group"><label>Who can enter attendance?</label>
+                <select><option>Teacher Only</option><option>Office Assistant Only</option><option>Both</option></select>
+              </div>
+              <div class="form-group"><label>Who can enter marks?</label>
+                <select><option>Office Assistant Only</option><option>Teacher Only</option><option>Both</option></select>
+              </div>
+              <div class="form-group"><label>Internal exam max marks</label><input type="number" value="30"></div>
+              <div class="form-group"><label>Semester exam max marks</label><input type="number" value="70"></div>
+              <button class="btn btn-blue btn-sm" onclick="saveConfig('Marks policy')">Save</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">🔧 Module Toggles</div></div>
+            <div class="panel-body">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">SkillHub</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">Micro-Internships</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">CR Elections</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">Anonymous Complaints</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0"><span style="font-size:.83rem">Parent Dashboard</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+              <button class="btn btn-blue btn-sm" style="margin-top:.8rem" onclick="saveConfig('Module configuration')">Save All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ COMPLAINTS ══ -->
+    <div class="page" id="page-complaints">
+      <div class="alert alert-danger">🚨 Complaint <strong>CB-2025-0031</strong> has exceeded both HOD & VC escalation limits. Direct Super Admin intervention required.</div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">All Complaints (System-wide)</div>
+          <div style="display:flex;gap:.5rem">
+            <select class="btn btn-ghost btn-sm" style="cursor:pointer"><option>All Levels</option><option>Staff</option><option>HOD</option><option>VC</option></select>
+            <select class="btn btn-ghost btn-sm" style="cursor:pointer"><option>All Status</option><option>Pending</option><option>Resolved</option></select>
+          </div>
+        </div>
+        <div class="panel-body"><div class="table-wrap"><table>
+          <thead><tr><th>Ticket ID</th><th>Dept</th><th>Category</th><th>Date</th><th>Level</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td>CB-2025-0031</td><td>MCA</td><td>Infrastructure</td><td>10 Mar</td><td><span class="chip chip-red">VC Critical</span></td><td><span class="chip chip-red">Unresolved</span></td><td><div class="t-action-row"><button class="btn btn-blue btn-sm" onclick="openModal('resolveModal')">Resolve</button><button class="btn btn-ghost btn-sm" onclick="openModal('viewComplaintModal')">View</button><button class="btn btn-danger btn-sm" onclick="openModal('mailVCModal')">Mail VC</button></div></td></tr>
+            <tr><td>CB-2025-0028</td><td>MCA</td><td>Faculty Conduct</td><td>8 Mar</td><td><span class="chip chip-yellow">HOD</span></td><td><span class="chip chip-yellow">Pending</span></td><td><div class="t-action-row"><button class="btn btn-ghost btn-sm" onclick="openModal('viewComplaintModal')">View</button><button class="btn btn-ghost btn-sm" onclick="openModal('resolveModal')">Resolve</button></div></td></tr>
+            <tr><td>CB-2025-0018</td><td>BCA</td><td>Academic</td><td>2 Mar</td><td><span class="chip chip-blue">Staff</span></td><td><span class="chip chip-green">Resolved</span></td><td><button class="btn btn-ghost btn-sm" onclick="openModal('viewComplaintModal')">View</button></td></tr>
+          </tbody>
+        </table></div></div>
+      </div>
+    </div>
+
+    <!-- ══ SKILLHUB MONITOR ══ -->
+    <div class="page" id="page-skillhub">
+      <div class="skill-monitor" style="margin-bottom:1.5rem">
+        <div class="sk-card"><div class="sk-num" style="color:#4f8ef7">48</div><div class="sk-lbl">Active Users in SkillHub</div></div>
+        <div class="sk-card"><div class="sk-num" style="color:#00e5c0">12</div><div class="sk-lbl">Internship Tasks Open</div></div>
+        <div class="sk-card"><div class="sk-num" style="color:#7c4dff">27</div><div class="sk-lbl">Skill Exchanges Active</div></div>
+        <div class="sk-card"><div class="sk-num" style="color:#00d68f">94</div><div class="sk-lbl">Badges Awarded</div></div>
+        <div class="sk-card"><div class="sk-num" style="color:#ffb347">18</div><div class="sk-lbl">Tasks Completed</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Internship Tasks</div><button class="btn btn-ghost btn-sm" onclick="openModal('addSkillTaskModal')">+ Post Task</button></div>
+          <div class="panel-body"><div class="table-wrap"><table>
+            <thead><tr><th>Task</th><th>Teacher</th><th>Students</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>UI Redesign</td><td>Prof. Sharma</td><td>3</td><td><span class="chip chip-yellow">Active</span></td><td><div class="t-action-row"><button class="btn btn-ghost btn-sm" onclick="openModal('viewTaskModal')">View</button><button class="btn btn-danger btn-sm" onclick="confirmDelete('task UI Redesign')">Remove</button></div></td></tr>
+              <tr><td>Data Analysis</td><td>Prof. Rao</td><td>2</td><td><span class="chip chip-blue">New</span></td><td><div class="t-action-row"><button class="btn btn-ghost btn-sm" onclick="openModal('viewTaskModal')">View</button><button class="btn btn-danger btn-sm" onclick="confirmDelete('task Data Analysis')">Remove</button></div></td></tr>
+            </tbody>
+          </table></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Skill Exchanges</div></div>
+          <div class="panel-body"><div class="table-wrap"><table>
+            <thead><tr><th>Exchange</th><th>Posted By</th><th>Interested</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>Python ↔ UI Design</td><td>Swagatika Pati</td><td>3</td><td><div class="t-action-row"><button class="btn btn-danger btn-sm" onclick="confirmDelete('this exchange')">Remove</button></div></td></tr>
+              <tr><td>SQL ↔ React</td><td>Ipsita Prusty</td><td>1</td><td><div class="t-action-row"><button class="btn btn-danger btn-sm" onclick="confirmDelete('this exchange')">Remove</button></div></td></tr>
+            </tbody>
+          </table></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REPORTS ══ -->
+    <div class="page" id="page-reports">
+      <div class="sa-stats">
+        <div class="sa-card"><span class="sa-ico">📊</span><div class="sa-val" style="color:#4f8ef7">79%</div><div class="sa-lbl">System-wide Attendance</div></div>
+        <div class="sa-card"><span class="sa-ico">📝</span><div class="sa-val" style="color:#00d68f">81</div><div class="sa-lbl">Avg Marks (All Depts)</div></div>
+        <div class="sa-card"><span class="sa-ico">⚠️</span><div class="sa-val" style="color:#ffb347">22</div><div class="sa-lbl">Students Below 75%</div></div>
+        <div class="sa-card"><span class="sa-ico">👩‍🏫</span><div class="sa-val" style="color:#7c4dff">14.2</div><div class="sa-lbl">Avg Faculty Hours/Week</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Dept-wise Attendance</div></div>
+          <div class="panel-body">
+            <div class="mini-ring"><span style="width:80px;font-size:.82rem">MCA</span><div class="ring-bar"><div class="ring-fill" style="width:79%;background:#4f8ef7"></div></div><span style="font-size:.8rem;color:#6b7799;margin-left:.4rem">79%</span></div>
+            <div class="mini-ring"><span style="width:80px;font-size:.82rem">BCA</span><div class="ring-bar"><div class="ring-fill" style="width:82%;background:#00d68f"></div></div><span style="font-size:.8rem;color:#6b7799;margin-left:.4rem">82%</span></div>
+            <div class="mini-ring"><span style="width:80px;font-size:.82rem">B.Tech</span><div class="ring-bar"><div class="ring-fill" style="width:76%;background:#ffb347"></div></div><span style="font-size:.8rem;color:#6b7799;margin-left:.4rem">76%</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Generate Reports</div></div>
+          <div class="panel-body" style="display:flex;flex-direction:column;gap:.6rem">
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start" onclick="generateReport('Monthly Attendance')">📊 Monthly Attendance Report — All Depts</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start" onclick="generateReport('Academic Performance')">📝 Academic Performance Report</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start" onclick="generateReport('Faculty Load')">👩‍🏫 Faculty Workload Report</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start" onclick="generateReport('SkillHub Engagement')">💡 SkillHub Engagement Report</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start" onclick="generateReport('Complaint Resolution')">🔒 Complaint Resolution Report</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start" onclick="generateReport('System Audit')">📋 Full System Audit Export</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AUDIT LOGS ══ -->
+    <div class="page" id="page-audit">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.7rem">
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <select class="btn btn-ghost btn-sm" style="cursor:pointer"><option>All Actions</option><option>Login</option><option>Marks Entry</option><option>Attendance</option><option>Permission Change</option><option>User Created</option></select>
+          <select class="btn btn-ghost btn-sm" style="cursor:pointer"><option>All Users</option><option>Teachers</option><option>HODs</option><option>Office</option><option>Students</option></select>
+          <input type="date" class="btn btn-ghost btn-sm" style="cursor:pointer;font-family:'DM Sans',sans-serif">
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="generateReport('Audit Log')">⬇ Export</button>
+      </div>
+      <div class="panel">
+        <div class="panel-body">
+          <div class="audit-feed">
+            <div class="a-row"><div class="a-dot" style="background:#4f8ef7"></div><div class="a-time">19 Mar · 10:15 AM</div><div class="a-text"><span class="a-user">Prof. P. Sharma</span> marked attendance — Web Tech, MCA Sem 3 (38/42 present) · <span class="chip chip-blue" style="font-size:.7rem">Attendance</span></div></div>
+            <div class="a-row"><div class="a-dot" style="background:#00d68f"></div><div class="a-time">19 Mar · 9:42 AM</div><div class="a-text"><span class="a-user">HOD R. Mishra</span> approved leave — Student 236036 · <span class="chip chip-green" style="font-size:.7rem">Leave</span></div></div>
+            <div class="a-row"><div class="a-dot" style="background:#ffb347"></div><div class="a-time">19 Mar · 9:02 AM</div><div class="a-text"><span class="a-user">Office Meena</span> entered DBMS Internal 2 marks — MCA Sem 3 · <span class="chip chip-yellow" style="font-size:.7rem">Marks</span></div></div>
+            <div class="a-row"><div class="a-dot" style="background:#ff4d6d"></div><div class="a-time">18 Mar · 4:15 PM</div><div class="a-text"><span class="a-user">New Registration</span> Student 236070 (Ankit Sharma) submitted — pending verification · <span class="chip chip-red" style="font-size:.7rem">User</span></div></div>
+            <div class="a-row"><div class="a-dot" style="background:#7c4dff"></div><div class="a-time">18 Mar · 11:30 AM</div><div class="a-text"><span class="a-user">Prof. R. Rao</span> uploaded OS notes to resource library — MCA Sem 3 · <span class="chip chip-purple" style="font-size:.7rem">Resource</span></div></div>
+            <div class="a-row"><div class="a-dot" style="background:#ff4d6d"></div><div class="a-time">17 Mar · 2:10 PM</div><div class="a-text"><span class="a-user">Super Admin</span> updated complaint escalation timer to 24 hrs · <span class="chip chip-red" style="font-size:.7rem">Config</span></div></div>
+            <div class="a-row"><div class="a-dot" style="background:#4f8ef7"></div><div class="a-time">16 Mar · 10:00 AM</div><div class="a-text"><span class="a-user">Prof. P. Sharma</span> login — IP: 192.168.1.45 · <span class="chip chip-blue" style="font-size:.7rem">Login</span></div></div>
+            <div class="a-row"><div class="a-dot" style="background:#00d68f"></div><div class="a-time">15 Mar · 3:22 PM</div><div class="a-text"><span class="a-user">Super Admin</span> created new faculty: Prof. V. Kumar (Teacher role) · <span class="chip chip-green" style="font-size:.7rem">User Created</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SECURITY ══ -->
+    <div class="page" id="page-security">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">🔒 Password Policy</div></div>
+          <div class="panel-body">
+            <div class="form-group"><label>Minimum password length</label><input type="number" value="8"></div>
+            <div class="form-group"><label>Password expiry (days, 0=never)</label><input type="number" value="90"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">Require uppercase letter</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">Require number</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0"><span style="font-size:.83rem">Require special character</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+            <button class="btn btn-blue btn-sm" style="margin-top:.8rem" onclick="saveConfig('Password policy')">Save</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">🛡️ Authentication Control</div></div>
+          <div class="panel-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">Two-Factor Authentication (Admin)</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">Session timeout (minutes)</span><input type="number" value="30" style="width:70px;background:#0f1420;border:1px solid #1e2840;color:#e8ecf8;padding:.3rem .5rem;border-radius:6px;outline:none;font-family:'DM Sans',sans-serif"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">Lock after failed attempts</span><input type="number" value="5" style="width:70px;background:#0f1420;border:1px solid #1e2840;color:#e8ecf8;padding:.3rem .5rem;border-radius:6px;outline:none;font-family:'DM Sans',sans-serif"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0"><span style="font-size:.83rem">Allow multiple sessions</span><label class="tog"><input type="checkbox"><div class="tog-sl"></div></label></div>
+            <button class="btn btn-blue btn-sm" style="margin-top:.8rem" onclick="saveConfig('Security settings')">Save</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Suspicious Activity</div></div>
+          <div class="panel-body">
+            <div class="alert alert-warn" style="font-size:.82rem">⚠️ Prof. X. Mehta had 4 failed login attempts at 2:13 AM from unknown IP</div>
+            <button class="btn btn-danger btn-sm" onclick="alert('Account locked. User notified via email.')">Lock Account</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Active Sessions</div></div>
+          <div class="panel-body"><div class="table-wrap"><table>
+            <thead><tr><th>User</th><th>Role</th><th>IP</th><th>Since</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>Prof. Sharma</td><td>Teacher</td><td>192.168.1.45</td><td>2h ago</td><td><button class="btn btn-danger btn-sm" onclick="alert('Session terminated.')">End</button></td></tr>
+              <tr><td>HOD Mishra</td><td>HOD</td><td>192.168.1.12</td><td>45m ago</td><td><button class="btn btn-danger btn-sm" onclick="alert('Session terminated.')">End</button></td></tr>
+            </tbody>
+          </table></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BROADCAST ══ -->
+    <div class="page" id="page-broadcast">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">📢 Send Announcement</div></div>
+          <div class="panel-body">
+            <div class="form-group"><label>Title</label><input type="text" id="bc-title" placeholder="Announcement title"></div>
+            <div class="form-group"><label>Target Audience</label>
+              <div class="notif-targets">
+                <button class="ntarget sel" onclick="toggleTarget(this)">All Users</button>
+                <button class="ntarget" onclick="toggleTarget(this)">Students</button>
+                <button class="ntarget" onclick="toggleTarget(this)">Teachers</button>
+                <button class="ntarget" onclick="toggleTarget(this)">HODs</button>
+                <button class="ntarget" onclick="toggleTarget(this)">Parents</button>
+                <button class="ntarget" onclick="toggleTarget(this)">Office</button>
+              </div>
+            </div>
+            <div class="form-group"><label>Department (optional)</label>
+              <select><option value="">All Departments</option><option>MCA</option><option>BCA</option><option>B.Tech CSE</option></select>
+            </div>
+            <div class="form-group"><label>Message</label><textarea rows="4" id="bc-msg" placeholder="Write your announcement here..."></textarea></div>
+            <div class="form-group"><label>Priority</label>
+              <select id="bc-priority"><option>Normal</option><option>Important</option><option>Urgent</option></select>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;font-size:.83rem"><span>Also send email</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+            <button class="btn btn-blue" onclick="sendBroadcast()">Send Broadcast</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Broadcast History</div></div>
+          <div class="panel-body"><div class="table-wrap"><table>
+            <thead><tr><th>Title</th><th>Target</th><th>Sent</th><th>Priority</th></tr></thead>
+            <tbody>
+              <tr><td>Exam Schedule Released</td><td>All</td><td>15 Mar</td><td><span class="chip chip-yellow">Important</span></td></tr>
+              <tr><td>Holiday Notice – Holi</td><td>All</td><td>10 Mar</td><td><span class="chip chip-blue">Normal</span></td></tr>
+              <tr><td>Attendance Deadline Warning</td><td>Students</td><td>5 Mar</td><td><span class="chip chip-red">Urgent</span></td></tr>
+            </tbody>
+          </table></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BRANDING ══ -->
+    <div class="page" id="page-branding">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">🎨 College Identity</div><span style="font-size:.75rem;color:#6b7799">Changes reflect system-wide instantly</span></div>
+          <div class="panel-body">
+            <div class="form-group"><label>College Name</label><input type="text" id="b-name" value="Vikramshila College of Technology" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Short Name / Code</label><input type="text" value="VCT"></div>
+            <div class="form-group"><label>Tagline</label><input type="text" id="b-tag" value="Excellence in Education · Est. 1998" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Logo URL</label><input type="url" placeholder="https://..."></div>
+            <div class="form-group"><label>Primary Contact Email</label><input type="email" value="admin@vct.edu.in"></div>
+            <div class="form-group"><label>Phone</label><input type="tel" value="+91 06759-220001"></div>
+            <div class="form-group"><label>Address</label><textarea rows="2">Angul, Odisha – 759122</textarea></div>
+            <div class="form-group"><label>Notice Board / Guidelines</label><textarea rows="4" id="b-notice" oninput="updatePreview()">Welcome to the new academic session! All students must maintain 75% attendance to be eligible for semester examinations. For any grievances, use the anonymous complaint portal. — Dr. R. Mishra, Principal</textarea></div>
+            <button class="btn btn-blue" onclick="saveConfig('College branding')">Save & Publish</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Live Preview</div></div>
+          <div class="panel-body">
+            <div style="background:#0f1420;border:1px solid #1e2840;border-radius:12px;padding:1.4rem">
+              <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,#4f8ef7,#00e5c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.2rem" id="pv-name">Vikramshila College of Technology</div>
+              <div style="font-size:.78rem;color:#6b7799;margin-bottom:1rem" id="pv-tag">Excellence in Education · Est. 1998</div>
+              <div style="background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.2);border-radius:8px;padding:.9rem;font-size:.8rem;color:#e8ecf8;line-height:1.6" id="pv-notice">Welcome to the new academic session! All students must maintain 75% attendance...</div>
+            </div>
+            <div style="margin-top:1rem;font-size:.78rem;color:#6b7799">This panel will appear on the student, teacher, and parent dashboards.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DATABASE ══ -->
+    <div class="page" id="page-database">
+      <div class="alert alert-danger">⚠️ Database operations are irreversible. Proceed with caution. All actions are logged in the audit trail.</div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">🗄️ Backup & Restore</div></div>
+          <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+            <div style="background:#0f1420;border:1px solid #1e2840;border-radius:8px;padding:.9rem;font-size:.82rem">
+              <div style="color:#6b7799;margin-bottom:.3rem">Last Backup</div>
+              <div style="font-weight:600">18 Mar 2025 · 11:59 PM</div>
+            </div>
+            <button class="btn btn-blue" onclick="alert('Backup started! You will be notified when complete.')">⬇ Create Backup Now</button>
+            <button class="btn btn-ghost" onclick="alert('Select backup file to restore...')">⬆ Restore from Backup</button>
+            <button class="btn btn-ghost" onclick="generateReport('Database Export')">📦 Export Full Database (JSON)</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">📊 Database Stats</div></div>
+          <div class="panel-body">
+            <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(30,40,64,.6);font-size:.83rem"><span>Users collection</span><span style="color:#4f8ef7;font-weight:600">342 docs</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(30,40,64,.6);font-size:.83rem"><span>Attendance records</span><span style="color:#4f8ef7;font-weight:600">18,240 docs</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(30,40,64,.6);font-size:.83rem"><span>Marks records</span><span style="color:#4f8ef7;font-weight:600">4,680 docs</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(30,40,64,.6);font-size:.83rem"><span>Complaints</span><span style="color:#4f8ef7;font-weight:600">47 docs</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.4rem 0;font-size:.83rem"><span>Total DB size</span><span style="color:#00d68f;font-weight:600">128 MB</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">⚠️ Danger Zone</div></div>
+        <div class="panel-body" style="display:flex;gap:.75rem;flex-wrap:wrap">
+          <button class="btn btn-danger" onclick="confirmDelete('ALL attendance records older than 2 years')">🗑️ Purge Old Attendance</button>
+          <button class="btn btn-danger" onclick="confirmDelete('ALL inactive user accounts')">🗑️ Remove Inactive Users</button>
+          <button class="btn btn-danger" onclick="confirmDelete('ALL complaint records older than 1 year')">🗑️ Archive Old Complaints</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- Add Department -->
+<div class="modal-backdrop" id="addDeptModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Add New Department</h3><button class="close-btn" onclick="closeModal('addDeptModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Department Name</label><input type="text" placeholder="e.g. Electronics & Communication"></div>
+      <div class="form-group"><label>Short Code</label><input type="text" placeholder="e.g. ECE"></div>
+      <div class="form-group"><label>HOD (Assign Admin)</label><select><option>-- Select HOD --</option><option>Dr. R. Mishra</option><option>Dr. S. Panda</option></select></div>
+      <div class="form-group"><label>Number of Years</label><input type="number" value="2" min="1" max="4"></div>
+      <div class="form-group"><label>Semesters per Year</label><input type="number" value="2" min="1" max="2"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('addDeptModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('addDeptModal','Department created successfully!')">Create Department</button></div>
+  </div>
+</div>
+
+<!-- Edit Department -->
+<div class="modal-backdrop" id="editDeptModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Edit Department</h3><button class="close-btn" onclick="closeModal('editDeptModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Department Name</label><input type="text" value="MCA – Master of Computer Applications"></div>
+      <div class="form-group"><label>Short Code</label><input type="text" value="MCA"></div>
+      <div class="form-group"><label>HOD</label><select><option>Dr. R. Mishra</option><option>Dr. S. Panda</option></select></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('editDeptModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('editDeptModal','Department updated!')">Save Changes</button></div>
+  </div>
+</div>
+
+<!-- Add Sem -->
+<div class="modal-backdrop" id="addSemModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Add Semester</h3><button class="close-btn" onclick="closeModal('addSemModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Year</label><select><option>1st Year</option><option>2nd Year</option></select></div>
+      <div class="form-group"><label>Semester Name</label><input type="text" placeholder="e.g. Sem 5"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('addSemModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('addSemModal','Semester added!')">Add Semester</button></div>
+  </div>
+</div>
+
+<!-- Add Year -->
+<div class="modal-backdrop" id="addYearModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Add Year</h3><button class="close-btn" onclick="closeModal('addYearModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Year Label</label><input type="text" placeholder="e.g. 3rd Year"></div>
+      <div class="form-group"><label>Semesters in this year</label><input type="number" value="2" min="1" max="2"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('addYearModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('addYearModal','Year added!')">Add Year</button></div>
+  </div>
+</div>
+
+<!-- Add Custom Role -->
+<div class="modal-backdrop" id="addRoleModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Create Custom Role</h3><button class="close-btn" onclick="closeModal('addRoleModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Role Name</label><input type="text" placeholder="e.g. Exam Controller"></div>
+      <div class="form-group"><label>Base Role (inherit permissions from)</label><select><option>Teacher</option><option>Office Staff</option><option>HOD</option><option>Custom (blank)</option></select></div>
+      <p style="font-size:.8rem;color:#6b7799;margin-top:.5rem">You can fine-tune permissions after creating the role from the Permission Matrix.</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('addRoleModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('addRoleModal','Custom role created! Assign permissions in the matrix.')">Create Role</button></div>
+  </div>
+</div>
+
+<!-- Edit Role -->
+<div class="modal-backdrop" id="editRoleModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Edit Role</h3><button class="close-btn" onclick="closeModal('editRoleModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Role Name</label><input type="text" value="Teacher"></div>
+      <div class="form-group"><label>Description</label><input type="text" value="Faculty members with attendance and marks entry"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('editRoleModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('editRoleModal','Role updated!')">Save</button></div>
+  </div>
+</div>
+
+<!-- Edit Permissions -->
+<div class="modal-backdrop" id="editPermModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Edit Permissions – Teacher</h3><button class="close-btn" onclick="closeModal('editPermModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Select Role</label><select><option>HOD / Admin</option><option>Teacher</option><option>Office Staff</option><option>Student</option><option>Parent</option></select></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">View Attendance</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">Mark Attendance</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">Enter Marks</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1e2840"><span style="font-size:.83rem">View Reports</span><label class="tog"><input type="checkbox" checked><div class="tog-sl"></div></label></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem 0"><span style="font-size:.83rem">Manage Users</span><label class="tog"><input type="checkbox"><div class="tog-sl"></div></label></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('editPermModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('editPermModal','Permissions updated and applied immediately!')">Save Permissions</button></div>
+  </div>
+</div>
+
+<!-- Add User -->
+<div class="modal-backdrop" id="addUserModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Add New User</h3><button class="close-btn" onclick="closeModal('addUserModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Full Name</label><input type="text" placeholder="Full name"></div>
+      <div class="form-group"><label>Email</label><input type="email" placeholder="user@college.edu"></div>
+      <div class="form-group"><label>Role</label><select><option>Student</option><option>Teacher</option><option>HOD</option><option>Office Staff</option><option>Parent</option></select></div>
+      <div class="form-group"><label>Department</label><select><option>MCA</option><option>BCA</option><option>B.Tech CSE</option><option>Admin</option></select></div>
+      <div class="form-group"><label>Temporary Password</label><input type="password" placeholder="User will be prompted to change"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('addUserModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('addUserModal','User created! Credentials sent to email.')">Create User</button></div>
+  </div>
+</div>
+
+<!-- Edit User -->
+<div class="modal-backdrop" id="editUserModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Edit User</h3><button class="close-btn" onclick="closeModal('editUserModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Full Name</label><input type="text" value="Prof. P. Sharma"></div>
+      <div class="form-group"><label>Email</label><input type="email" value="sharma@college.edu"></div>
+      <div class="form-group"><label>Role</label><select><option>Teacher</option><option>HOD</option><option>Office Staff</option></select></div>
+      <div class="form-group"><label>Department</label><select><option>MCA</option><option>BCA</option><option>B.Tech CSE</option></select></div>
+      <div class="form-group"><label>Status</label><select><option>Active</option><option>Suspended</option></select></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('editUserModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('editUserModal','User updated successfully!')">Save Changes</button></div>
+  </div>
+</div>
+
+<!-- Resolve Complaint -->
+<div class="modal-backdrop" id="resolveModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Resolve Complaint</h3><button class="close-btn" onclick="closeModal('resolveModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="alert alert-info" style="font-size:.82rem">Ticket: CB-2025-0031 · Category: Infrastructure · Raised: 10 Mar</div>
+      <div class="form-group"><label>Resolution Note</label><textarea rows="3" placeholder="Describe how this was resolved..."></textarea></div>
+      <div class="form-group"><label>Resolved By</label><input type="text" value="Super Admin"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('resolveModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('resolveModal','Complaint marked as resolved. Student notified.')">Mark Resolved</button></div>
+  </div>
+</div>
+
+<!-- View Complaint -->
+<div class="modal-backdrop" id="viewComplaintModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Complaint Details</h3><button class="close-btn" onclick="closeModal('viewComplaintModal')">✕</button></div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:.6rem;font-size:.83rem">
+        <div><span style="color:#6b7799">Ticket ID:</span> CB-2025-0031</div>
+        <div><span style="color:#6b7799">Category:</span> Infrastructure</div>
+        <div><span style="color:#6b7799">Raised:</span> 10 Mar 2025</div>
+        <div><span style="color:#6b7799">Status:</span> <span class="chip chip-red">Unresolved – VC Level</span></div>
+        <div><span style="color:#6b7799">Description:</span><div style="margin-top:.3rem;background:#0f1420;padding:.8rem;border-radius:8px;line-height:1.6">The lab computers in Room 104 have been non-functional for over 3 weeks. Multiple requests to maintenance have gone unanswered. This is severely affecting our practical sessions.</div></div>
+        <div><span style="color:#6b7799">Timeline:</span>
+          <div style="margin-top:.3rem">
+            <div style="font-size:.78rem;color:#6b7799">10 Mar – Raised by student (anonymous)</div>
+            <div style="font-size:.78rem;color:#ffb347">13 Mar – Escalated to HOD (24hr limit exceeded)</div>
+            <div style="font-size:.78rem;color:#ff4d6d">15 Mar – Escalated to VC level (48hr HOD limit exceeded)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('viewComplaintModal')">Close</button><button class="btn btn-blue" onclick="closeModal('viewComplaintModal');openModal('resolveModal')">Resolve Now</button></div>
+  </div>
+</div>
+
+<!-- Mail VC -->
+<div class="modal-backdrop" id="mailVCModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Mail Vice Chancellor</h3><button class="close-btn" onclick="closeModal('mailVCModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>To</label><input type="email" value="vc@college.edu" readonly></div>
+      <div class="form-group"><label>Subject</label><input type="text" value="Urgent: Unresolved Complaint CB-2025-0031 – Infrastructure Issue"></div>
+      <div class="form-group"><label>Message</label><textarea rows="5">Respected Sir/Madam,
+
+This is an automated escalation notice. Complaint CB-2025-0031 (Infrastructure) has exceeded both staff and HOD resolution time limits (72+ hours). Immediate intervention is requested.
+
+— CRAMBRUNCH System</textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('mailVCModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('mailVCModal','Email sent to Vice Chancellor!')">Send Email</button></div>
+  </div>
+</div>
+
+<!-- Broadcast (quick modal) -->
+<div class="modal-backdrop" id="broadcastModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Quick Broadcast</h3><button class="close-btn" onclick="closeModal('broadcastModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Title</label><input type="text" placeholder="Announcement title"></div>
+      <div class="form-group"><label>Target</label><select><option>All Users</option><option>Students Only</option><option>Teachers Only</option></select></div>
+      <div class="form-group"><label>Message</label><textarea rows="3" placeholder="Your message..."></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('broadcastModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('broadcastModal','Broadcast sent to all users!')">Send Now</button></div>
+  </div>
+</div>
+
+<!-- View SkillHub Task -->
+<div class="modal-backdrop" id="viewTaskModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Task Details</h3><button class="close-btn" onclick="closeModal('viewTaskModal')">✕</button></div>
+    <div class="modal-body">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.5rem">UI Redesign for Dept. Website</div>
+      <div style="font-size:.82rem;color:#6b7799;margin-bottom:.8rem">Posted by Prof. P. Sharma · Deadline: 30 Mar 2025</div>
+      <div style="font-size:.83rem;line-height:1.6;margin-bottom:1rem">Task: Redesign the department website homepage using Figma. Submit the final mockup with rationale for design choices.</div>
+      <div style="font-size:.82rem"><span style="color:#6b7799">Students assigned:</span> Pujarani Sahoo, Swagatika Pati, Ipsita Prusty</div>
+      <div style="font-size:.82rem;margin-top:.4rem"><span style="color:#6b7799">Status:</span> <span class="chip chip-yellow">In Progress</span></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('viewTaskModal')">Close</button><button class="btn btn-danger" onclick="submitForm('viewTaskModal','Task removed from SkillHub!')">Remove Task</button></div>
+  </div>
+</div>
+
+<!-- Add SkillHub Task -->
+<div class="modal-backdrop" id="addSkillTaskModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Post Internship Task</h3><button class="close-btn" onclick="closeModal('addSkillTaskModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Task Title</label><input type="text" placeholder="e.g. Build College Mobile App"></div>
+      <div class="form-group"><label>Assigned Teacher/Supervisor</label><select><option>Prof. P. Sharma</option><option>Prof. R. Rao</option><option>Super Admin (Direct)</option></select></div>
+      <div class="form-group"><label>Description</label><textarea rows="3" placeholder="Describe the task..."></textarea></div>
+      <div class="form-group"><label>Deadline</label><input type="date"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('addSkillTaskModal')">Cancel</button><button class="btn btn-blue" onclick="submitForm('addSkillTaskModal','Task posted to SkillHub!')">Post Task</button></div>
+  </div>
+</div>
+
+<script>
+// ── Page navigation ──
+function showPage(p,btn){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  const el=document.getElementById('page-'+p);
+  if(el)el.classList.add('active');
+  if(btn)btn.classList.add('active');
+  const titles={overview:'System Overview','academic':'Academic Structure','rbac':'Roles & Permissions','users':'All Users','create-role':'Create Admin / Role','config':'System Configuration','complaints':'All Complaints','skillhub':'SkillHub Monitor','reports':'Reports & Analytics','audit':'Audit Logs','security':'Security','broadcast':'Broadcast','branding':'College Branding','database':'Database Control'};
+  document.getElementById('pageTitle').textContent=titles[p]||p;
+  closeSidebar();
+}
+function showNav(p){document.querySelectorAll('.nav-item').forEach(b=>{if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+p+"'"))b.classList.add('active')})}
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('open')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open')}
+
+// ── Modal system ──
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function submitForm(modalId,msg){closeModal(modalId);showToast(msg)}
+document.querySelectorAll('.modal-backdrop').forEach(m=>{m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')})});
+
+// ── Toast notification ──
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  t.style.cssText='position:fixed;bottom:1.5rem;right:1.5rem;background:#141928;border:1px solid #00d68f;color:#00d68f;padding:.8rem 1.2rem;border-radius:10px;font-size:.84rem;z-index:9999;animation:mup .25s ease;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+// ── Confirm delete ──
+function confirmDelete(what){
+  if(confirm('Are you sure you want to delete '+what+'? This action cannot be undone.'))showToast('Deleted: '+what)
+}
+
+// ── Dept tree toggle ──
+function toggleDept(head){
+  const body=head.nextElementSibling;
+  const arr=head.querySelector('span:last-child');
+  body.classList.toggle('open');
+  if(arr)arr.textContent=body.classList.contains('open')?'▼':'▶';
+}
+
+// ── User suspend ──
+function toggleSuspend(btn){
+  const isSuspended=btn.textContent==='Activate';
+  btn.textContent=isSuspended?'Suspend':'Activate';
+  const row=btn.closest('tr');
+  const chip=row.querySelector('td:nth-child(5) .chip');
+  if(chip){chip.className=isSuspended?'chip chip-green':'chip chip-yellow';chip.textContent=isSuspended?'Active':'Suspended'}
+  showToast(isSuspended?'Account activated!':'Account suspended!')
+}
+
+// ── Verify user ──
+function verifyUser(btn){
+  const row=btn.closest('tr');
+  const chip=row.querySelector('td:nth-child(5) .chip');
+  if(chip){chip.className='chip chip-green';chip.textContent='Active'}
+  const td=btn.closest('td');
+  td.innerHTML='<button class="btn btn-ghost btn-sm" onclick="openModal(\'editUserModal\')">Edit</button>';
+  showToast('Student verified! Login credentials sent via email.')
+}
+
+// ── Create role page logic ──
+function toggleDeptField(v){
+  document.getElementById('customRoleField').style.display=v==='custom'?'block':'none';
+}
+
+// ── Create user ──
+function createUser(){
+  const n=document.getElementById('cr-name').value;
+  const e=document.getElementById('cr-email').value;
+  const r=document.getElementById('cr-role').value;
+  if(!n||!e||!r){showToast('⚠️ Please fill all required fields');return}
+  showToast('✅ '+n+' created as '+r+'. Credentials sent to '+e)
+  document.getElementById('cr-name').value='';
+  document.getElementById('cr-email').value='';
+}
+
+// ── Broadcast ──
+function sendBroadcast(){
+  const t=document.getElementById('bc-title').value;
+  const m=document.getElementById('bc-msg').value;
+  if(!t||!m){showToast('⚠️ Please fill title and message');return}
+  showToast('📢 Broadcast sent: "'+t+'"');
+  document.getElementById('bc-title').value='';
+  document.getElementById('bc-msg').value='';
+}
+
+// ── Branding preview ──
+function updatePreview(){
+  const n=document.getElementById('b-name').value;
+  const t=document.getElementById('b-tag').value;
+  const no=document.getElementById('b-notice').value;
+  document.getElementById('pv-name').textContent=n;
+  document.getElementById('pv-tag').textContent=t;
+  document.getElementById('pv-notice').textContent=no.substring(0,180)+(no.length>180?'...':'');
+}
+
+// ── Save config ──
+function saveConfig(section){showToast('✅ '+section+' saved and applied!')}
+
+// ── Report generation ──
+function generateReport(type){showToast('📊 Generating: '+type+' report... Will download shortly.')}
+
+// ── Notification targets ──
+function toggleTarget(btn){btn.classList.toggle('sel')}
+
+// ── Filter users (stub for backend) ──
+function filterUsersByRole(v){
+  // POST /api/admin/users?role=v → repopulate table
+  if(v)showToast('Filtering users by role: '+v);
+}
+</script>
+</body>
+</html>

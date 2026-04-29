@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forgot Password</title>
+
+<style>
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#020617,#0f172a);
+font-family:sans-serif;
+color:white;
+}
+
+.box{
+width:350px;
+padding:30px;
+background:rgba(30,41,59,.7);
+border-radius:12px;
+text-align:center;
+box-shadow:0 0 20px rgba(37,99,235,.4);
+}
+
+input{
+width:100%;
+padding:10px;
+margin:10px 0;
+border:none;
+border-radius:6px;
+}
+
+button{
+width:100%;
+padding:10px;
+border:none;
+border-radius:6px;
+background:#2563eb;
+color:white;
+cursor:pointer;
+margin-top:10px;
+}
+
+button:hover{
+box-shadow:0 0 10px #2563eb;
+}
+
+#msg{
+margin-top:10px;
+color:#22c55e;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>🔑 Forgot Password</h2>
+
+<input id="email" placeholder="Enter Email">
+<button onclick="sendOtp()">Send OTP</button>
+
+<input id="otp" placeholder="Enter OTP">
+<input id="newPass" type="password" placeholder="New Password">
+
+<button onclick="resetPass()">Reset Password</button>
+
+<p id="msg"></p>
+</div>
+
+<script>
+function sendOtp(){
+
+fetch("/send-otp",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+email:email.value
+})
+})
+.then(res=>res.json())
+.then(data=>{
+msg.innerText=data.msg;
+});
+
+}
+
+function resetPass(){
+
+fetch("/verify-otp",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+email:email.value,
+otp:otp.value,
+newPassword:newPass.value
+})
+})
+.then(res=>res.json())
+.then(data=>{
+msg.innerText=data.msg;
+
+if(data.msg==="Password Updated"){
+setTimeout(()=>{
+window.location="login.html";
+},1000);
+}
+
+});
+
+}
+</script>
+
+</body>
+</html>

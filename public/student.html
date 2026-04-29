@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:sans-serif;
+}
+
+body{
+display:flex;
+height:100vh;
+background:linear-gradient(135deg,#020617,#0f172a);
+color:#fff;
+}
+
+/* Sidebar */
+.sidebar{
+width:260px;
+background:rgba(15,23,42,.9);
+padding:20px;
+backdrop-filter:blur(10px);
+}
+
+.sidebar h2{
+margin-bottom:20px;
+}
+
+.nav-item{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:none;
+border-radius:8px;
+background:#1e293b;
+color:#fff;
+cursor:pointer;
+transition:.3s;
+}
+
+.nav-item:hover,
+.active{
+background:#2563eb;
+box-shadow:0 0 12px #2563eb;
+}
+
+/* Main */
+.main{
+flex:1;
+padding:25px;
+overflow-y:auto;
+}
+
+.topbar{
+font-size:24px;
+font-weight:bold;
+margin-bottom:20px;
+}
+
+.page{
+display:none;
+}
+
+.page.active{
+display:block;
+}
+
+.card{
+background:rgba(30,41,59,.7);
+padding:20px;
+border-radius:12px;
+margin-bottom:15px;
+box-shadow:0 0 15px rgba(0,0,0,.4);
+}
+
+.card:hover{
+transform:translateY(-4px);
+transition:.3s;
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin:8px 0;
+border:none;
+border-radius:6px;
+outline:none;
+}
+
+button{
+padding:10px 15px;
+border:none;
+border-radius:6px;
+background:#22c55e;
+color:#fff;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+background:#16a34a;
+}
+
+ul{
+list-style:none;
+padding:0;
+}
+
+li{
+padding:8px;
+margin:6px 0;
+background:#0f172a;
+border-radius:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+<h2>🎓 Student Panel</h2>
+
+<button class="nav-item active" onclick="showPage('home',this)">🏠 Dashboard</button>
+<button class="nav-item" onclick="showPage('attendance',this)">📊 Attendance</button>
+<button class="nav-item" onclick="showPage('marks',this)">📝 Marks</button>
+<button class="nav-item" onclick="showPage('materials',this)">📚 Materials</button>
+<button class="nav-item" onclick="showPage('complaint',this)">🔒 Complaint</button>
+<button class="nav-item" onclick="showPage('skill',this)">🚀 SkillHub</button>
+</div>
+
+<div class="main">
+
+<div class="topbar" id="pageTitle">Dashboard</div>
+
+<!-- Home -->
+<div class="page active" id="page-home">
+<div class="card">
+<h2>Welcome to CRAMBRUNCH 👋</h2>
+<br>
+<p>Explore your dashboard with modern experience.</p>
+</div>
+</div>
+
+<!-- Attendance -->
+<div class="page" id="page-attendance">
+<div class="card">
+<h3>Attendance & Eligibility</h3>
+<div id="attendanceBox"></div>
+</div>
+</div>
+
+<!-- Marks -->
+<div class="page" id="page-marks">
+<div class="card">
+<h3>Your Marks</h3>
+<ul id="marksList"></ul>
+</div>
+</div>
+
+<!-- Materials -->
+<div class="page" id="page-materials">
+<div class="card">
+<h3>Study Materials</h3>
+<ul>
+<li>📄 DBMS Notes</li>
+<li>📄 OS PDF</li>
+<li>📄 Web Tech Slides</li>
+</ul>
+</div>
+</div>
+
+<!-- Complaint -->
+<div class="page" id="page-complaint">
+<div class="card">
+<h3>Raise Complaint</h3>
+<textarea id="complaintText" placeholder="Write your complaint..."></textarea>
+<button onclick="submitComplaint()">Submit</button>
+</div>
+</div>
+
+<!-- Skill -->
+<div class="page" id="page-skill">
+<div class="card">
+<h3>Skill Exchange 🚀</h3>
+
+<input id="skillOffered" placeholder="Your Skill">
+<input id="skillWanted" placeholder="Skill You Want">
+
+<button onclick="addSkill()">Add Skill</button>
+
+<br><br>
+<h4>Available Exchanges</h4>
+<ul id="skillList"></ul>
+</div>
+</div>
+
+</div>
+
+<script src="student.js"></script>
+</body>
+</html>

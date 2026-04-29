@@ -1,0 +1,159 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>HOD / Admin Dashboard – CRAMBRUNCH</title>
+<link rel="stylesheet" href="shared.css">
+</head><body>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CRAMBRUNCH
+    <img src="CRAMBRUNCHLOGO.jpeg " height="45px" width="45px" alt="">
+  </div>
+  <div class="sidebar-role">HOD / Admin Portal</div>
+  <div class="nav-section">Management</div>
+  <button class="nav-item active" onclick="showPage('home',this)"><span class="icon">🏠</span>Overview</button>
+  <button class="nav-item" onclick="showPage('users',this)"><span class="icon">👥</span>User Management</button>
+  <button class="nav-item" onclick="showPage('faculty',this)"><span class="icon">👩‍🏫</span>Faculty Management</button>
+  <div class="nav-section">Operations</div>
+  <button class="nav-item" onclick="showPage('complaints',this)"><span class="icon">🔒</span>Complaints</button>
+  <button class="nav-item" onclick="showPage('leave',this)"><span class="icon">✅</span>Leave Approvals</button>
+  <button class="nav-item" onclick="showPage('reports',this)"><span class="icon">📊</span>Reports</button>
+  <button class="nav-item" onclick="showPage('notifications',this)"><span class="icon">🔔</span>Notifications</button>
+  <div class="sidebar-bottom">
+    <a href="../index.html" style="display:flex;align-items:center;gap:.5rem;color:var(--muted);text-decoration:none;font-size:.8rem;margin-bottom:.8rem">← Back to Home</a>
+    <div class="user-info"><div class="avatar">DR</div><div><div class="user-name">Dr. R. Mishra</div><div class="user-role">HOD – MCA Dept.</div></div></div>
+  </div>
+</div>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button class="sidebar-toggle" onclick="openSidebar()">☰</button>
+      <div class="topbar-title" id="pageTitle">Overview</div>
+    </div>
+    <div class="topbar-right"><button class="notif-btn">🔔<span class="badge">4</span></button></div>
+  </div>
+  <div class="content">
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(79,142,247,.15)">🎒</div></div><div class="stat-value">186</div><div class="stat-label">Total Students</div></div>
+        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(0,214,143,.15)">👩‍🏫</div></div><div class="stat-value">12</div><div class="stat-label">Faculty Members</div></div>
+        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(255,179,71,.15)">🔒</div></div><div class="stat-value">3</div><div class="stat-label">Open Complaints</div></div>
+        <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(124,77,255,.15)">📋</div></div><div class="stat-value">5</div><div class="stat-label">Pending Leaves</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-header"><div class="panel-title">Dept. Attendance</div></div>
+        <div class="panel-body">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.8rem"><div style="flex:1;font-size:.83rem">MCA Sem 1</div><div style="width:120px"><div class="progress-bar"><div class="progress-fill" style="width:82%;background:var(--success)"></div></div></div><div style="font-size:.8rem;color:var(--muted);width:35px;text-align:right">82%</div></div>
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.8rem"><div style="flex:1;font-size:.83rem">MCA Sem 2</div><div style="width:120px"><div class="progress-bar"><div class="progress-fill" style="width:78%;background:var(--accent)"></div></div></div><div style="font-size:.8rem;color:var(--muted);width:35px;text-align:right">78%</div></div>
+          <div style="display:flex;align-items:center;gap:.75rem"><div style="flex:1;font-size:.83rem">MCA Sem 3</div><div style="width:120px"><div class="progress-bar"><div class="progress-fill" style="width:76%;background:var(--warn)"></div></div></div><div style="font-size:.8rem;color:var(--muted);width:35px;text-align:right">76%</div></div>
+        </div></div>
+        <div class="panel"><div class="panel-header"><div class="panel-title">Pending Approvals</div></div>
+        <div class="panel-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border)">
+            <div><div style="font-size:.83rem">Leave: Prof. Sharma (22 Mar)</div><div style="font-size:.75rem;color:var(--muted)">Medical · 1 day</div></div>
+            <div style="display:flex;gap:.4rem"><button class="btn btn-success btn-sm" onclick="alert('Approved!')">✓</button><button class="btn btn-danger btn-sm" onclick="alert('Rejected!')">✗</button></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0">
+            <div><div style="font-size:.83rem">Leave: Pujarani Sahoo (25–26 Mar)</div><div style="font-size:.75rem;color:var(--muted)">Personal · 2 days</div></div>
+            <div style="display:flex;gap:.4rem"><button class="btn btn-success btn-sm" onclick="alert('Approved!')">✓</button><button class="btn btn-danger btn-sm" onclick="alert('Rejected!')">✗</button></div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+    <!-- USER MGMT -->
+    <div class="page" id="page-users">
+      <div class="panel"><div class="panel-header"><div class="panel-title">Add / Remove Students</div><button class="btn btn-blue btn-sm" onclick="alert('Add student form')">+ Add Student</button></div>
+      <div class="panel-body"><div class="table-wrap">
+        <table>
+          <thead><tr><th>Roll No</th><th>Name</th><th>Dept</th><th>Sem</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>236036</td><td>Pujarani Sahoo</td><td>MCA</td><td>3</td><td><span class="chip chip-green">Active</span></td><td><button class="btn btn-ghost btn-sm">Edit</button></td></tr>
+            <tr><td>236056</td><td>Swagatika Pati</td><td>MCA</td><td>3</td><td><span class="chip chip-green">Active</span></td><td><button class="btn btn-ghost btn-sm">Edit</button></td></tr>
+            <tr><td>236019</td><td>Ipsita Prusty</td><td>MCA</td><td>3</td><td><span class="chip chip-green">Active</span></td><td><button class="btn btn-ghost btn-sm">Edit</button></td></tr>
+          </tbody>
+        </table>
+      </div></div></div>
+      <div class="panel"><div class="panel-header"><div class="panel-title">Pending Student Verifications</div></div>
+      <div class="panel-body"><div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Roll No</th><th>Registered</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Ankit Sharma</td><td>236070</td><td>17 Mar</td><td><div style="display:flex;gap:.4rem"><button class="btn btn-success btn-sm" onclick="alert('Student verified! Credentials emailed.')">Verify</button><button class="btn btn-danger btn-sm">Reject</button></div></td></tr>
+          </tbody>
+        </table>
+      </div></div></div>
+    </div>
+    <!-- FACULTY MGMT -->
+    <div class="page" id="page-faculty">
+      <div class="panel"><div class="panel-header"><div class="panel-title">Faculty List</div><button class="btn btn-blue btn-sm" onclick="alert('Create faculty form')">+ Add Faculty</button></div>
+      <div class="panel-body"><div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Subjects</th><th>Weekly Hrs</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Prof. P. Sharma</td><td>Web Tech, DBMS</td><td>16</td><td><span class="chip chip-green">Active</span></td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+            <tr><td>Prof. R. Rao</td><td>OS, CN</td><td>14</td><td><span class="chip chip-green">Active</span></td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+            <tr><td>Prof. A. Nair</td><td>Data Structures</td><td>12</td><td><span class="chip chip-yellow">On Leave</span></td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+          </tbody>
+        </table>
+      </div></div></div>
+    </div>
+    <!-- COMPLAINTS -->
+    <div class="page" id="page-complaints">
+      <div class="alert alert-warn">⚠️ 1 complaint has exceeded the resolution time limit and is escalated to your priority list.</div>
+      <div class="panel"><div class="panel-header"><div class="panel-title">Complaint Tickets</div></div>
+      <div class="panel-body"><div class="table-wrap">
+        <table>
+          <thead><tr><th>Ticket ID</th><th>Category</th><th>Date</th><th>Level</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>CB-2025-0031</td><td>Infrastructure</td><td>10 Mar</td><td><span class="chip chip-yellow">HOD Escalated</span></td><td><span class="chip chip-yellow">Pending</span></td><td><button class="btn btn-ghost btn-sm">Resolve</button></td></tr>
+            <tr><td>CB-2025-0028</td><td>Faculty Conduct</td><td>8 Mar</td><td><span class="chip chip-blue">Staff</span></td><td><span class="chip chip-yellow">Pending</span></td><td><button class="btn btn-ghost btn-sm">Review</button></td></tr>
+            <tr><td>CB-2025-0018</td><td>Academic</td><td>2 Mar</td><td><span class="chip chip-blue">Staff</span></td><td><span class="chip chip-green">Resolved</span></td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div></div></div>
+    </div>
+    <!-- LEAVE APPROVALS -->
+    <div class="page" id="page-leave">
+      <div class="panel"><div class="panel-header"><div class="panel-title">Leave Approval Queue</div></div>
+      <div class="panel-body"><div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Role</th><th>Dates</th><th>Type</th><th>Reason</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Prof. P. Sharma</td><td>Faculty</td><td>22 Mar</td><td>Medical</td><td>Doctor appointment</td><td><div style="display:flex;gap:.4rem"><button class="btn btn-success btn-sm" onclick="alert('Approved!')">Approve</button><button class="btn btn-danger btn-sm">Reject</button></div></td></tr>
+            <tr><td>Pujarani Sahoo</td><td>Student</td><td>25–26 Mar</td><td>Personal</td><td>Family event</td><td><div style="display:flex;gap:.4rem"><button class="btn btn-success btn-sm" onclick="alert('Approved!')">Approve</button><button class="btn btn-danger btn-sm">Reject</button></div></td></tr>
+            <tr><td>Swagatika Pati</td><td>Student</td><td>28 Mar</td><td>Medical</td><td>Medical checkup</td><td><div style="display:flex;gap:.4rem"><button class="btn btn-success btn-sm" onclick="alert('Approved!')">Approve</button><button class="btn btn-danger btn-sm">Reject</button></div></td></tr>
+          </tbody>
+        </table>
+      </div></div></div>
+    </div>
+    <!-- REPORTS -->
+    <div class="page" id="page-reports">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value">79%</div><div class="stat-label">Dept Avg Attendance</div></div>
+        <div class="stat-card"><div class="stat-value">81</div><div class="stat-label">Dept Avg Marks</div></div>
+        <div class="stat-card"><div class="stat-value">12</div><div class="stat-label">Students Below 75%</div></div>
+        <div class="stat-card"><div class="stat-value">98%</div><div class="stat-label">Exam Eligibility Rate</div></div>
+      </div>
+      <div class="panel"><div class="panel-header"><div class="panel-title">Generate Report</div></div>
+      <div class="panel-body" style="display:flex;gap:.75rem;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="alert('Generating attendance report...')">📊 Monthly Attendance Report</button>
+        <button class="btn btn-ghost" onclick="alert('Generating performance report...')">📝 Academic Performance Report</button>
+        <button class="btn btn-ghost" onclick="alert('Generating faculty report...')">👩‍🏫 Faculty Load Report</button>
+      </div></div></div>
+    </div>
+    <!-- NOTIFICATIONS -->
+    <div class="page" id="page-notifications">
+      <div class="panel"><div class="panel-header"><div class="panel-title">Notifications</div><button class="btn btn-blue btn-sm" onclick="alert('Post announcement')">+ Announce</button></div>
+      <div class="panel-body">
+        <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.9rem 0;border-bottom:1px solid var(--border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--danger);flex-shrink:0;margin-top:.35rem"></div><div><div style="font-size:.84rem">Complaint CB-2025-0031 has exceeded 24hr resolution time — escalated to your queue</div><div style="font-size:.75rem;color:var(--muted);margin-top:.15rem">Today · 9:00 AM</div></div></div>
+        <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.9rem 0;border-bottom:1px solid var(--border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:.35rem"></div><div><div style="font-size:.84rem">New student registration: Ankit Sharma (236070) pending verification</div><div style="font-size:.75rem;color:var(--muted);margin-top:.15rem">17 Mar 2025</div></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+<script>
+function showPage(p,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+p).classList.add('active');if(btn)btn.classList.add('active');const t={home:'Overview',users:'User Management',faculty:'Faculty Management',complaints:'Complaints',leave:'Leave Approvals',reports:'Reports',notifications:'Notifications'};document.getElementById('pageTitle').textContent=t[p]||p;closeSidebar()}
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('open')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open')}
+</script>
+</body></html

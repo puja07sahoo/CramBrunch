@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Teacher Dashboard</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:sans-serif;
+}
+
+body{
+  display:flex;
+  height:100vh;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#fff;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:260px;
+  background:rgba(15,23,42,0.9);
+  padding:20px;
+  box-shadow:0 0 25px rgba(37,99,235,0.2);
+}
+
+.sidebar h2{
+  margin-bottom:25px;
+  text-align:center;
+}
+
+.sidebar button{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border:none;
+  background:#1e293b;
+  color:#fff;
+  cursor:pointer;
+  border-radius:8px;
+  transition:.3s;
+}
+
+.sidebar button:hover{
+  background:#2563eb;
+  box-shadow:0 0 12px #2563eb;
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:25px;
+  overflow-y:auto;
+}
+
+/* PAGE */
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+/* CARD */
+.card{
+  background:rgba(30,41,59,0.7);
+  padding:25px;
+  border-radius:14px;
+  margin-bottom:20px;
+  box-shadow:0 0 20px rgba(0,0,0,0.4);
+}
+
+/* INPUT */
+input{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:8px;
+  outline:none;
+}
+
+/* BUTTON */
+.action-btn{
+  padding:12px 18px;
+  background:#22c55e;
+  border:none;
+  color:#fff;
+  cursor:pointer;
+  border-radius:8px;
+  font-weight:bold;
+}
+
+.action-btn:hover{
+  background:#16a34a;
+}
+
+/* TITLE */
+.top{
+  font-size:28px;
+  margin-bottom:18px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>👨‍🏫 Teacher Panel</h2>
+
+  <button onclick="showPage('home')">🏠 Dashboard</button>
+  <button onclick="showPage('attendance')">📊 Mark Attendance</button>
+  <button onclick="showPage('marksPage')">📝 Upload Marks</button>
+</div>
+
+<div class="main">
+
+<div class="top">CRAMBRUNCH Teacher Dashboard</div>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <div class="card">
+    <h3>Welcome Teacher 👋</h3>
+    <br>
+    <p>Manage student attendance and upload marks easily.</p>
+  </div>
+</div>
+
+<!-- ATTENDANCE -->
+<div id="attendance" class="page">
+  <div class="card">
+    <h3>📊 Mark Attendance</h3>
+
+    <input id="stuId" placeholder="Student ID">
+    <input id="percent" placeholder="Attendance %">
+
+    <button class="action-btn" onclick="addAttendance()">Submit</button>
+  </div>
+</div>
+
+<!-- MARKS -->
+<div id="marksPage" class="page">
+  <div class="card">
+    <h3>📝 Upload Marks</h3>
+
+    <input id="stuIdM" placeholder="Student ID">
+    <input id="subject" placeholder="Subject Name">
+    <input id="marksInput" placeholder="Marks">
+
+    <button class="action-btn" onclick="addMarks()">Submit</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+
+/* PAGE SWITCH */
+function showPage(page){
+
+  document.querySelectorAll(".page").forEach(function(p){
+    p.classList.remove("active");
+  });
+
+  document.getElementById(page).classList.add("active");
+}
+
+
+/* MARK ATTENDANCE */
+function addAttendance(){
+
+  let userId = document.getElementById("stuId").value.trim();
+  let percentage = document.getElementById("percent").value.trim();
+
+  if(userId==="" || percentage===""){
+    alert("Fill all fields");
+    return;
+  }
+
+  fetch("/mark-attendance",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      userId:userId,
+      percentage:percentage
+    })
+  })
+
+  .then(function(res){
+    return res.json();
+  })
+
+  .then(function(data){
+    alert(data.msg);
+
+    document.getElementById("stuId").value="";
+    document.getElementById("percent").value="";
+  })
+
+  .catch(function(err){
+    alert("Server Error");
+    console.log(err);
+  });
+
+}
+
+
+/* UPLOAD MARKS */
+function addMarks(){
+
+  let userId = document.getElementById("stuIdM").value.trim();
+  let subject = document.getElementById("subject").value.trim();
+  let marks = document.getElementById("marksInput").value.trim();
+
+  if(userId==="" || subject==="" || marks===""){
+    alert("Fill all fields");
+    return;
+  }
+
+  fetch("/upload-marks",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      userId:userId,
+      subject:subject,
+      marks:marks
+    })
+  })
+
+  .then(function(res){
+    return res.json();
+  })
+
+  .then(function(data){
+    alert(data.msg);
+
+    document.getElementById("stuIdM").value="";
+    document.getElementById("subject").value="";
+    document.getElementById("marksInput").value="";
+  })
+
+  .catch(function(err){
+    alert("Server Error");
+    console.log(err);
+  });
+
+}
+
+</script>
+
+</body>
+</html>
